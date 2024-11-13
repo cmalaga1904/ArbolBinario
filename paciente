@@ -1,0 +1,205 @@
+#include <iostream>
+#include <cstdlib>
+
+using namespace std;
+
+struct nodo {
+    int edad;
+    int niup;
+    nodo *izq;
+    nodo *der;
+};
+
+struct nodo *raiz, *aux, *aux2, *padre;
+
+int posicionar() {
+    if (aux->edad > aux2->edad) {
+        if (aux2->izq == NULL) {
+            aux2->izq = aux;
+            return 0;
+        } else {
+            aux2 = aux2->izq;
+            posicionar();
+        }
+    } else {
+        if (aux2->der == NULL) {
+            aux2->der = aux;
+            return 0;
+        } else {
+            aux2 = aux2->der;
+            posicionar();
+        }
+    }
+    return 0;
+}
+
+int registrar() {
+    aux = (nodo *)malloc(sizeof(nodo));
+    cout << "Digite la edad del paciente: ";
+    cin >> aux->edad;
+    cout << "Digite el NIUP del paciente: ";
+    cin >> aux->niup;
+    aux->izq = aux->der = NULL;
+
+    if (!raiz) {
+        raiz = aux;
+    } else {
+        aux2 = raiz;
+        posicionar();
+    }
+    return 0;
+}
+
+int recorrer(nodo *a) {
+    if (a->der != NULL) {
+        recorrer(a->der);
+    }
+    cout << "Edad: " << a->edad << ", NIUP: " << a->niup << endl;
+    if (a->izq != NULL) {
+        recorrer(a->izq);
+    }
+}
+
+int mostrar() {
+    if (raiz) {
+        recorrer(raiz);
+    } else {
+        cout << "No hay pacientes registrados." << endl;
+    }
+    return 0;
+}
+
+int ubicarPadre(int niupBuscado) {
+      int ubicarPadre(int niupBuscado) {
+    padre = NULL;
+    aux2 = raiz;
+    while (aux2 != NULL && aux2->niup != niupBuscado) {
+        if (niupBuscado < aux2->niup) {
+            padre = aux2;
+            aux2 = aux2->izq;
+        } else {
+            padre = aux2;
+            aux2 = aux2->der;
+        }
+    }
+    return 0;
+}
+}
+int buscarPaciente(int niupBuscado) {
+    aux2 = raiz;
+    while (aux2 != NULL && aux2->niup != niupBuscado) {
+        if (niupBuscado < aux2->niup) {
+            aux2 = aux2->izq;
+        } else {
+            aux2 = aux2->der;
+        }
+    }
+    if (aux2 != NULL) {
+        cout << "Paciente encontrado. Edad: " << aux2->edad << endl;
+    } else {
+        cout << "Paciente no encontrado." << endl;
+    }
+}
+
+// Caso 1: sin hijos
+int eliminarPaciente() {
+    if (aux2->izq == NULL && aux2->der == NULL) { 
+        if (aux2 != raiz) {
+            if (padre->izq == aux2) {
+                padre->izq = NULL;
+            } else {
+                padre->der = NULL;
+            }
+        } else {
+            raiz = NULL;
+        }
+        // Caso 2: con un hijo
+    } else if (aux2->izq == NULL || aux2->der == NULL) { 
+        nodo *hijo = (aux2->izq != NULL) ? aux2->izq : aux2->der;
+        if (aux2 != raiz) {
+            if (padre->izq == aux2) {
+                padre->izq = hijo;
+            } else {
+                padre->der = hijo;
+            }
+        } else {
+            raiz = hijo;
+        }
+        // Caso 3: con dos hijos
+    } else { 
+        nodo *sucesor = aux2->der;
+        nodo *padreSucesor = aux2;
+
+        while (sucesor->izq != NULL) {
+            padreSucesor = sucesor;
+            sucesor = sucesor->izq;
+        }
+
+        aux2->edad = sucesor->edad;
+        aux2->niup = sucesor->niup;
+
+        if (padreSucesor->izq == sucesor) {
+            padreSucesor->izq = sucesor->der;
+        } else {
+            padreSucesor->der = sucesor->der;
+        }
+        aux2 = sucesor;
+    }
+    free(aux2);
+    cout << "Paciente eliminado exitosamente." << endl;
+}
+
+int eliminar() {
+    int niupBuscado;
+    cout << "Digite el NIUP del paciente a eliminar: ";
+    cin >> niupBuscado;
+
+    ubicarPadre(niupBuscado);
+
+    if (aux2 != NULL) {
+        eliminarPaciente();
+    } else {
+        cout << "Paciente no encontrado." << endl;
+    }
+    return 0;
+}
+
+int main() {
+    int opcion;
+    do {
+        cout << "1. Registrar paciente"
+        <<endl<<"2. Mostrar pacientes en orden de mayor a menor edad"
+        <<endl<<"3. Buscar paciente por NIUP"
+        <<endl<<"4. Eliminar paciente por NIUP"
+        <<endl<<"5. Salir"
+        <<endl;
+        cout << "Seleccione una opcion: ";
+        cin >> opcion;
+
+        switch (opcion) {
+            case 1:
+                registrar();
+                break;
+            case 2:
+                mostrar();
+                break;
+            case 3: {
+                int niupBuscado;
+                cout << "Digite el NIUP del paciente a buscar: ";
+                cin >> niupBuscado;
+                buscarPaciente(niupBuscado);
+                break;
+            }
+            case 4:
+                eliminar();
+                break;
+            case 5:
+                cout << "Saliendo del programa." << endl;
+                break;
+            default:
+                cout << "Opcion no valida." << endl;
+        }
+    } while (opcion != 5);
+
+    return 0;
+}
